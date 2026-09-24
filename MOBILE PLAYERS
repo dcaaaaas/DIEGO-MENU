@@ -1,12 +1,5 @@
-local scripts = getscripts()
-for _, script in scripts do
-    local success, result = pcall(getscriptbytecode, script)
-        if not success then
-        while true do
-            task.wait(67)
-        end
-    end
-end
+-- GUI FIX: removed startup bytecode-wait blocker.
+-- This does not change the existing whitelist/access checks or feature callbacks.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local toDestroy = {
     "SecurityEvent",
