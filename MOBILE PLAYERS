@@ -147,7 +147,7 @@ end
 --==================================================
 
 local WHITELIST_URL =
-	"https://gist.githubusercontent.com/qwdgo-main/d45b8e61e2119a7292d076d820adb34c/raw/whitelist.json"
+	"https://gist.githubusercontent.com/qwdgo-main/14ffb839815ee99f3b131d6c04827c8b/raw/a38515ad04d0bda4a1d6f4198fbfb20ca73df890/whitelist.json"
 
 local function CheckWhitelist()
 
