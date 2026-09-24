@@ -242,7 +242,9 @@ if not IsWhitelisted then
 end
 
 print("✅ Whitelisted! Loading Diegs Loader...")
-
+--==================================================
+-- DIEGO MENU
+--==================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
