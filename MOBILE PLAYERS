@@ -243,10 +243,6 @@ end
 
 print("✅ Whitelisted! Loading Diegs Loader...")
 
--- DIEGO MENU - CLEAN GUI STARTUP
--- Whitelist/access checks and external telemetry removed.
--- The original GUI/function section starts below this header.
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
