@@ -8555,23 +8555,32 @@ addMainMenuButton("SAN ANDREAS CITY ROLEPLAY SPAWN CASH $", function()
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local BuyWeapon = ReplicatedStorage
-    :WaitForChild("GunStoreFolder", 9e9)
-    :WaitForChild("BuyWeapon", 9e9)
+local LocalPlayer = Players.LocalPlayer
+
 local BLACK = Color3.fromRGB(0, 0, 0)
 local WHITE = Color3.fromRGB(255, 255, 255)
-local FONT  = Enum.Font.RobotoMono
-local FAST  = TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local MED   = TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local FONT = Enum.Font.RobotoMono
+local FAST = TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local MED = TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
 local function tw(obj, props, info)
     TweenService:Create(obj, info or FAST, props):Play()
 end
+
 local W, H = 280, 220
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SpawnCash_GUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Inilagay sa PlayerGui o CoreGui kung ano ang available para siguradong lalabas
+local success, _ = pcall(function()
+    ScreenGui.Parent = game:GetService("CoreGui")
+end)
+if not success or not ScreenGui.Parent then
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, W, 0, H)
 Main.Position = UDim2.new(0.5, -W/2, 0.5, -H/2)
@@ -8579,8 +8588,10 @@ Main.BackgroundColor3 = BLACK
 Main.BorderSizePixel = 0
 Main.Parent = ScreenGui
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
+
 local ms = Instance.new("UIStroke", Main)
 ms.Color = WHITE; ms.Thickness = 1; ms.Transparency = 0.82
+
 local TitleBar = Instance.new("Frame")
 TitleBar.Size = UDim2.new(1, 0, 0, 48)
 TitleBar.BackgroundColor3 = BLACK
@@ -8588,15 +8599,18 @@ TitleBar.BorderSizePixel = 0
 TitleBar.ZIndex = 2
 TitleBar.Parent = Main
 Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 14)
+
 local tdiv = Instance.new("Frame", TitleBar)
 tdiv.Size = UDim2.new(1, -24, 0, 1)
 tdiv.Position = UDim2.new(0, 12, 1, -1)
 tdiv.BackgroundColor3 = WHITE; tdiv.BackgroundTransparency = 0.86; tdiv.BorderSizePixel = 0
+
 local tdot = Instance.new("Frame", TitleBar)
 tdot.Size = UDim2.new(0, 6, 0, 6)
 tdot.Position = UDim2.new(0, 16, 0.5, -3)
 tdot.BackgroundColor3 = WHITE; tdot.BorderSizePixel = 0; tdot.ZIndex = 3
 Instance.new("UICorner", tdot).CornerRadius = UDim.new(0, 2)
+
 local titleLbl = Instance.new("TextLabel", TitleBar)
 titleLbl.Size = UDim2.new(1, -110, 0, 16)
 titleLbl.Position = UDim2.new(0, 30, 0, 9)
@@ -8604,6 +8618,7 @@ titleLbl.BackgroundTransparency = 1
 titleLbl.Text = "SPAWN CASH"
 titleLbl.TextColor3 = WHITE; titleLbl.Font = FONT; titleLbl.TextSize = 12
 titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.ZIndex = 3
+
 local subLbl = Instance.new("TextLabel", TitleBar)
 subLbl.Size = UDim2.new(1, -110, 0, 12)
 subLbl.Position = UDim2.new(0, 30, 0, 27)
@@ -8612,6 +8627,7 @@ subLbl.Text = "coded by @ qwdgo"
 subLbl.TextColor3 = WHITE; subLbl.TextTransparency = 0.58
 subLbl.Font = FONT; subLbl.TextSize = 9
 subLbl.TextXAlignment = Enum.TextXAlignment.Left; subLbl.ZIndex = 3
+
 local function makeIconBtn(text, xOff)
     local btn = Instance.new("TextButton", TitleBar)
     btn.Size = UDim2.new(0, 26, 0, 26)
@@ -8633,28 +8649,34 @@ local function makeIconBtn(text, xOff)
     end)
     return btn
 end
+
 local CloseBtn = makeIconBtn("X", -38)
-local MinBtn   = makeIconBtn("-", -70)
+local MinBtn = makeIconBtn("-", -70)
 CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
 local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     tw(Main, {Size = UDim2.new(0, W, 0, minimized and 48 or H)}, MED)
 end)
+
 local Content = Instance.new("Frame", Main)
 Content.Size = UDim2.new(1, 0, 1, -48)
 Content.Position = UDim2.new(0, 0, 0, 48)
 Content.BackgroundTransparency = 1
 Content.ClipsDescendants = true
+
 local pad = Instance.new("UIPadding", Content)
 pad.PaddingLeft = UDim.new(0, 18)
 pad.PaddingRight = UDim.new(0, 18)
 pad.PaddingTop = UDim.new(0, 20)
 pad.PaddingBottom = UDim.new(0, 18)
+
 local listLayout = Instance.new("UIListLayout", Content)
 listLayout.Padding = UDim.new(0, 12)
 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
 local amountLbl = Instance.new("TextLabel", Content)
 amountLbl.Size = UDim2.new(1, 0, 0, 14)
 amountLbl.BackgroundTransparency = 1
@@ -8665,14 +8687,17 @@ amountLbl.Font = FONT
 amountLbl.TextSize = 10
 amountLbl.TextXAlignment = Enum.TextXAlignment.Left
 amountLbl.LayoutOrder = 1
+
 local boxFrame = Instance.new("Frame", Content)
 boxFrame.Size = UDim2.new(1, 0, 0, 44)
 boxFrame.BackgroundColor3 = BLACK
 boxFrame.BorderSizePixel = 0
 boxFrame.LayoutOrder = 2
 Instance.new("UICorner", boxFrame).CornerRadius = UDim.new(0, 10)
+
 local boxStroke = Instance.new("UIStroke", boxFrame)
 boxStroke.Color = WHITE; boxStroke.Thickness = 1; boxStroke.Transparency = 0.72
+
 local box = Instance.new("TextBox", boxFrame)
 box.Size = UDim2.new(1, -20, 1, 0)
 box.Position = UDim2.new(0, 10, 0, 0)
@@ -8686,8 +8711,10 @@ box.TextSize = 16
 box.TextXAlignment = Enum.TextXAlignment.Left
 box.ClearTextOnFocus = false
 box.TextStrokeTransparency = 1
+
 local boxPad = Instance.new("UIPadding", box)
 boxPad.PaddingLeft = UDim.new(0, 4)
+
 box.Focused:Connect(function()
     tw(boxStroke, {Transparency = 0.3})
 end)
@@ -8697,6 +8724,7 @@ box.FocusLost:Connect(function()
     if val == "" then val = "0" end
     box.Text = val
 end)
+
 local spawnBtn = Instance.new("TextButton", Content)
 spawnBtn.Size = UDim2.new(1, 0, 0, 44)
 spawnBtn.BackgroundColor3 = BLACK
@@ -8709,6 +8737,7 @@ spawnBtn.AutoButtonColor = false
 spawnBtn.LayoutOrder = 3
 spawnBtn.TextStrokeTransparency = 1
 Instance.new("UICorner", spawnBtn).CornerRadius = UDim.new(0, 10)
+
 spawnBtn.MouseEnter:Connect(function()
     tw(spawnBtn, {BackgroundTransparency = 0.15})
 end)
@@ -8721,12 +8750,17 @@ end)
 spawnBtn.MouseButton1Up:Connect(function()
     tw(spawnBtn, {Size = UDim2.new(1, 0, 0, 44)})
 end)
+
 spawnBtn.MouseButton1Click:Connect(function()
     local amount = tonumber(box.Text)
     if amount then
-        game:GetService("ReplicatedStorage"):WaitForChild("GunStoreFolder", 9e9):WaitForChild("BuyWeapon", 9e9):FireServer("Oxy", -amount)
+        pcall(function()
+game:GetService("ReplicatedStorage"):WaitForChild("GunStoreFolder", 9e9):WaitForChild("BuyWeapon", 9e9):FireServer("Oxy", -amount)
+        end)
     end
 end)
+
+-- Dragging System
 local dragging, dragStart, dragOrigin = false, nil, nil
 TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -8750,12 +8784,13 @@ UserInputService.InputChanged:Connect(function(input)
         )
     end
 end)
+
+-- Toggle UI gamit ang Right Shift key
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
         ScreenGui.Enabled = not ScreenGui.Enabled
     end
-end)
 end)
 addMainMenuButton("SAN ANDREAS CITY ROLEPLAY AUTO OXY $", function()
     while true do
