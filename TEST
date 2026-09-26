@@ -1,0 +1,902 @@
+-- DIEGO Menu - Roblox Fixed, Clickable GUI with Integrated Player List Tab
+
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Clean up existing GUI if re-running
+if CoreGui:FindFirstChild("DiegoMenuGui") then
+    CoreGui.DiegoMenuGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DiegoMenuGui"
+ScreenGui.Parent = CoreGui or LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- MAIN CONTAINER
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Position = UDim2.new(0.5, -350, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 700, 0, 450)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- NEON GREEN BORDER
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Parent = MainFrame
+UIStroke.Color = Color3.fromRGB(0, 255, 0)
+UIStroke.Thickness = 2
+
+-- TITLE
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 15, 0, 10)
+TitleLabel.Size = UDim2.new(0, 150, 0, 30)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "DIEGO"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 26
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- MINIMIZE FLOATING PILL FRAME
+local PillFrame = Instance.new("Frame")
+PillFrame.Name = "PillFrame"
+PillFrame.Parent = ScreenGui
+PillFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+PillFrame.Position = UDim2.new(0.5, -75, 0, 15)
+PillFrame.Size = UDim2.new(0, 150, 0, 32)
+PillFrame.Visible = false
+PillFrame.Active = true
+PillFrame.Draggable = true
+
+local PillCorner = Instance.new("UICorner")
+PillCorner.CornerRadius = UDim.new(0, 16)
+PillCorner.Parent = PillFrame
+
+local PillStroke = Instance.new("UIStroke")
+PillStroke.Parent = PillFrame
+PillStroke.Color = Color3.fromRGB(0, 255, 0)
+PillStroke.Thickness = 2
+
+local PillBtn = Instance.new("TextButton")
+PillBtn.Parent = PillFrame
+PillBtn.Size = UDim2.new(1, 0, 1, 0)
+PillBtn.BackgroundTransparency = 1
+PillBtn.Text = "DIEGO MENU ($)"
+PillBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+PillBtn.Font = Enum.Font.SourceSansBold
+PillBtn.TextSize = 13
+PillBtn.ZIndex = 10
+
+-- SIDEBAR (KALIWA)
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Parent = MainFrame
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Sidebar.Position = UDim2.new(0, 15, 0, 45)
+Sidebar.Size = UDim2.new(0, 140, 0, 390)
+
+local SidebarTitle = Instance.new("TextLabel")
+SidebarTitle.Parent = Sidebar
+SidebarTitle.BackgroundTransparency = 1
+SidebarTitle.Size = UDim2.new(1, 0, 0, 20)
+SidebarTitle.Font = Enum.Font.SourceSans
+SidebarTitle.Text = "Main Menu"
+SidebarTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+SidebarTitle.TextSize = 12
+
+local SidebarScroll = Instance.new("ScrollingFrame")
+SidebarScroll.Parent = Sidebar
+SidebarScroll.BackgroundTransparency = 1
+SidebarScroll.Position = UDim2.new(0, 0, 0, 25)
+SidebarScroll.Size = UDim2.new(1, 0, 1, -25)
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 380)
+SidebarScroll.ScrollBarThickness = 2
+
+local SidebarList = Instance.new("UIListLayout")
+SidebarList.Parent = SidebarScroll
+SidebarList.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarList.Padding = UDim.new(0, 2)
+
+-- CONTENT AREA (KANAN)
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Position = UDim2.new(0, 165, 0, 45)
+ContentFrame.Size = UDim2.new(0, 520, 0, 390)
+
+-- Panel Builder Helper
+local function CreatePanel(parent, title, size, pos)
+    local panel = Instance.new("Frame")
+    panel.Parent = parent
+    panel.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    panel.Position = pos
+    panel.Size = size
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Parent = panel
+    stroke.Color = Color3.fromRGB(40, 40, 40)
+    stroke.Thickness = 1
+
+    local header = Instance.new("TextLabel")
+    header.Parent = panel
+    header.BackgroundTransparency = 1
+    header.Position = UDim2.new(0, 10, 0, 5)
+    header.Size = UDim2.new(1, -20, 0, 20)
+    header.Font = Enum.Font.SourceSansBold
+    header.Text = title
+    header.TextColor3 = Color3.fromRGB(255, 255, 255)
+    header.TextSize = 14
+    header.TextXAlignment = Enum.TextXAlignment.Left
+
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Parent = panel
+    scroll.BackgroundTransparency = 1
+    scroll.Position = UDim2.new(0, 5, 0, 30)
+    scroll.Size = UDim2.new(1, -10, 1, -35)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scroll.ScrollBarThickness = 3
+    scroll.BorderSizePixel = 0
+
+    local list = Instance.new("UIListLayout")
+    list.Parent = scroll
+    list.SortOrder = Enum.SortOrder.LayoutOrder
+    list.Padding = UDim.new(0, 4)
+
+    return panel, scroll
+end
+
+-- UI Element Creators
+local function AddButton(parent, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    btn.Size = UDim2.new(1, -6, 0, 24)
+    btn.Font = Enum.Font.SourceSans
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.TextSize = 12
+    btn.ZIndex = 2
+
+    btn.MouseButton1Click:Connect(function()
+        print("Pindot: " .. text)
+        if callback then callback() end
+    end)
+    return btn
+end
+
+local function AddToggle(parent, text, defaultState, callback)
+    local container = Instance.new("Frame")
+    container.Parent = parent
+    container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, -6, 0, 22)
+
+    local label = Instance.new("TextLabel")
+    label.Parent = container
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.Size = UDim2.new(1, -35, 1, 0)
+    label.Font = Enum.Font.SourceSans
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextWrapped = true
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Parent = container
+    toggleBtn.BackgroundColor3 = defaultState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(50, 50, 50)
+    toggleBtn.Position = UDim2.new(1, -28, 0, 2)
+    toggleBtn.Size = UDim2.new(0, 25, 0, 16)
+    toggleBtn.Text = ""
+    toggleBtn.ZIndex = 2
+
+    local state = defaultState
+    toggleBtn.MouseButton1Click:Connect(function()
+        state = not state
+        toggleBtn.BackgroundColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(50, 50, 50)
+        if callback then callback(state) end
+    end)
+end
+
+local function AddSectionHeader(parent, text)
+    local header = Instance.new("TextLabel")
+    header.Parent = parent
+    header.BackgroundTransparency = 1
+    header.Size = UDim2.new(1, 0, 0, 20)
+    header.Font = Enum.Font.SourceSansBold
+    header.Text = text
+    header.TextColor3 = Color3.fromRGB(0, 255, 0)
+    header.TextSize = 12
+    header.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+-- PANELS MAP & TABS SYSTEM
+local tabPanels = {}
+local tabButtons = {}
+
+local tabs = {
+    "Big Head", "Roleplay Menu", "Auto Farm", "Player Menu", 
+    "Remotes", "Settings", "Player List"
+}
+
+local function SwitchTab(selectedTabName)
+    for name, container in pairs(tabPanels) do
+        container.Visible = (name == selectedTabName)
+    end
+    for name, btn in pairs(tabButtons) do
+        if name == selectedTabName then
+            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            btn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
+    end
+end
+
+for i, tabName in ipairs(tabs) do
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Parent = SidebarScroll
+    TabBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(20, 20, 20)
+    TabBtn.Size = UDim2.new(1, -5, 0, 22)
+    TabBtn.Font = Enum.Font.SourceSans
+    TabBtn.Text = "  ⚙ " .. tabName
+    TabBtn.TextColor3 = (i == 1) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(200, 200, 200)
+    TabBtn.TextSize = 12
+    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+    TabBtn.ZIndex = 2
+
+    local TabContainer = Instance.new("Frame")
+    TabContainer.Name = tabName .. "_Container"
+    TabContainer.Parent = ContentFrame
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.Size = UDim2.new(1, 0, 1, 0)
+    TabContainer.Visible = (i == 1)
+
+    tabPanels[tabName] = TabContainer
+    tabButtons[tabName] = TabBtn
+
+    TabBtn.MouseButton1Click:Connect(function()
+        SwitchTab(tabName)
+    end)
+end
+
+-- POPULATE DEFAULT SELF TAB
+local yL = 0
+    secLabel(L, yL, colW, "BIG HEAD / BODY"); yL = yL + 26
+    mkRow(L, yL, colW, "Enable Big Head", false, function(v)
+        if v then
+            bhStoreAndRestore(true)
+        else
+            bhStoreAndRestore(false)
+        end
+        BH.Enabled = v
+    end); yL = yL + 31
+    mkSlider(L, yL, colW, "Part Size", 1, 50, 1, function(v) BH.Size=v end); yL = yL + 49
+    mkSlider(L, yL, colW, "Transparency", 0, 100, 0, function(v) BH.Transparency=v/100 end); yL = yL + 49
+    secLabel(L, yL, colW, "SELECT PARTS"); yL = yL + 26
+    local PART_LABELS = {
+        {key="Head",label="Head"},{key="Torso",label="Torso"},
+        {key="RightArm",label="Right Arm"},{key="LeftArm",label="Left Arm"},
+        {key="RightLeg",label="Right Leg"},{key="LeftLeg",label="Left Leg"},
+    }
+    for _, pDef in ipairs(PART_LABELS) do
+        mkRow(L, yL, colW, pDef.label, BH.Parts[pDef.key], function(v) BH.Parts[pDef.key]=v end)
+        yL = yL + 31
+    end
+    local yR = 0
+    secLabel(R, yR, colW, "FOV"); yR = yR + 26
+    local BH_FOV_ENABLED = false
+    local bhFovCircle
+    if Drawing then
+        bhFovCircle = Drawing.new("Circle")
+        bhFovCircle.Thickness = 1.5
+        bhFovCircle.NumSides = 100
+        bhFovCircle.Filled = false
+        bhFovCircle.Color = Color3.fromRGB(255,255,255)
+        bhFovCircle.Visible = false
+        bhFovCircle.Radius = 60
+        RS.RenderStepped:Connect(function()
+            if BH_FOV_ENABLED then
+                local vp = CAM.ViewportSize / 2
+                bhFovCircle.Position = Vector2.new(vp.X, vp.Y)
+                bhFovCircle.Radius = BH.Size * 10
+                bhFovCircle.Visible = true
+            else bhFovCircle.Visible = false end
+        end)
+    end
+    mkRow(R, yR, colW, "Show FOV Circle", false, function(v) BH_FOV_ENABLED = v end); yR = yR + 31
+    secLabel(R, yR, colW, "OUTLINE ESP"); yR = yR + 26
+    local BH_ESP_Outlines = {}
+    mkRow(R, yR, colW, "Outline ESP", false, function(v)
+        if not v then
+            for pl, hl in pairs(BH_ESP_Outlines) do
+                pcall(function() hl:Destroy() end); BH_ESP_Outlines[pl]=nil
+            end
+        end
+    end); yR = yR + 31
+    local function applyBigHead(pl, char)
+        if pl==LP or not char then return end
+        pcall(function()
+            local head = char:FindFirstChild("Head")
+            if head then
+                local targetSz = Vector3.new(BH.Size, BH.Size, BH.Size)
+                if head.Size ~= targetSz then head.Size = targetSz end
+                if head.Transparency ~= BH.Transparency then head.Transparency = BH.Transparency end
+                if head.BrickColor ~= BrickColor.new("Red") then head.BrickColor = BrickColor.new("Red") end
+                if head.Material ~= Enum.Material.Neon then head.Material = Enum.Material.Neon end
+                if head.CanCollide then head.CanCollide = false end
+                if not head.Massless then head.Massless = true end
+            end
+            if BH.Parts.Torso then
+                for _, pName in ipairs(PART_NAMES.Torso) do
+                    local p = char:FindFirstChild(pName)
+                    if p and p:IsA("BasePart") then
+                        p.Size = Vector3.new(BH.Size, BH.Size, BH.Size)
+                        p.Transparency = BH.Transparency
+                        p.CanCollide = false; p.Massless = true
+                    end
+                end
+            end
+            for _, limb in ipairs({"RightArm","LeftArm","RightLeg","LeftLeg"}) do
+                if BH.Parts[limb] then
+                    for _, pName in ipairs(PART_NAMES[limb]) do
+                        local p = char:FindFirstChild(pName)
+                        if p and p:IsA("BasePart") then
+                            p.Size = Vector3.new(BH.Size, BH.Size, BH.Size)
+                            p.Transparency = BH.Transparency
+                            p.CanCollide = false; p.Massless = true
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    local bhUpdateTick = 0
+    RS.Heartbeat:Connect(function()
+        bhUpdateTick = bhUpdateTick + 1
+        if bhUpdateTick % 20 ~= 0 then return end  
+        local allPlayers = Players:GetPlayers()
+        if not BH.Enabled then
+            for _, pl in ipairs(allPlayers) do
+                if pl ~= LP then
+                    local char = pl.Character; if not char then continue end
+                    pcall(function()
+                        for _, partList in pairs(PART_NAMES) do
+                            for _, pName in ipairs(partList) do
+                                local part = char:FindFirstChild(pName)
+                                if part and part:IsA("BasePart") then
+                                    local orig = BH_OriginalSizes[pl] and BH_OriginalSizes[pl][pName]
+                                    if orig then
+                                        local diff = (part.Size - orig.Size).Magnitude
+                                        if diff > 0.05 then
+                                            part.Size = part.Size:Lerp(orig.Size, 0.4)
+                                        else
+                                            part.Size = orig.Size
+                                        end
+                                        if part.Transparency ~= orig.Trans then part.Transparency = orig.Trans end
+                                        if part.Material ~= orig.Mat then part.Material = orig.Mat end
+                                        if part.BrickColor ~= orig.BC then part.BrickColor = orig.BC end
+                                        if part.CanCollide ~= orig.CC then part.CanCollide = orig.CC end
+                                        if part.Massless ~= orig.ML then part.Massless = orig.ML end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end
+            return
+        end
+        for _, pl in ipairs(allPlayers) do
+            if pl ~= LP then
+                local char = pl.Character
+                if char then pcall(applyBigHead, pl, char) end
+            end
+        end
+    end)
+    Players.PlayerAdded:Connect(function(pl)
+        pl.CharacterAdded:Connect(function(c) task.wait(0.2); pcall(applyBigHead,pl,c) end)
+    end)
+
+-- ROLEPLAY MENU CONTENT
+local roleplayContainer = tabPanels["Roleplay Menu"]
+
+local _, roleplayScroll = CreatePanel(
+    roleplayContainer,
+    "Roleplay Menu",
+    UDim2.new(1, 0, 1, 0),
+    UDim2.new(0, 0, 0, 0)
+)
+
+AddButton(roleplayScroll, "DEVAS GUN SHOP BUY $", function()
+    print("DEVAS GUN SHOP BUY $ clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/d1360lucas-ai/DIEGSLOADER/refs/heads/main/DEVAS%20GUN%20SHOP"))()
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY .50 $", function()
+    print("HIRAYA CITY BUY .50 $ clicked")
+
+    local A_1 = "Product1"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY DEAGLE $", function()
+    print("HIRAYA CITY BUY DEAGLE $ clicked")
+
+    local A_1 = "Product2"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY G20 $", function()
+    print("HIRAYA CITY BUY G20 $ clicked")
+
+    local A_1 = "Product3"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY G19 $", function()
+    print("HIRAYA CITY BUY G19 $ clicked")
+
+    local A_1 = "Product4"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY BLUE PILLS $", function()
+    print("HIRAYA CITY BUY BLUE PILLS $ clicked")
+
+    local A_1 = "Product5"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY RED PILLS $", function()
+    print("HIRAYA CITY BUY RED PILLS $ clicked")
+
+    local A_1 = "Product6"
+local Event = game:GetService("ReplicatedStorage").ShopEvent.GunshopRequestBuy
+Event:FireServer(A_1)
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY FOOD $", function()
+    print("HIRAYA CITY BUY FOOD $ clicked")
+
+    local Event = game:GetService("ReplicatedStorage").ShopEvent["711RequestBuy"]
+		Event:FireServer("Product2")
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY WATER $", function()
+    print("HIRAYA CITY BUY WATER $ clicked")
+
+    local Event = game:GetService("ReplicatedStorage").ShopEvent["711RequestBuy"]
+		Event:FireServer("Product1")
+end)
+AddButton(roleplayScroll, "HIRAYA CITY BUY PILL $", function()
+    print("HIRAYA CITY BUY PILL $ clicked")
+
+    local Event = game:GetService("ReplicatedStorage").ShopEvent["711RequestBuy"]
+		Event:FireServer("Product3")
+end)
+
+-- AUTO FARM CONTENT
+local autoContainer = tabPanels["Auto Farm"]
+
+local _, autoScroll = CreatePanel(
+    autoContainer,
+    "Auto Farm",
+    UDim2.new(1, 0, 1, 0),
+    UDim2.new(0, 0, 0, 0)
+)
+
+AddButton(autoScroll, "HIRAYA AUTO FARM TP $", function()
+    print("HIRAYA AUTO FARM TP $ clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/d1360lucas-ai/DIEGSLOADER/refs/heads/main/AUTO%20FARM%20HIRAYA"))()
+end)
+AddButton(autoScroll, "DEVAS AUTO FARM TP $", function()
+    print("DEVAS AUTO FARM TP $ clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/d1360lucas-ai/DIEGSLOADER/refs/heads/main/AUTO%20FARM%20DEVAS"))()
+end)
+
+-- PLAYER MENU CONTENT
+local playerContainer = tabPanels["Player Menu"]
+
+local _, playerScroll = CreatePanel(
+    playerContainer,
+    "Player Menu",
+    UDim2.new(1, 0, 1, 0),
+    UDim2.new(0, 0, 0, 0)
+)
+
+AddButton(playerScroll, "BIG HEAD ($)", function()
+    print("BIG HEAD ($) clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/d1360lucas-ai/DIEGSLOADER/refs/heads/main/BH"))()
+end)
+AddButton(playerScroll, "FLY ($)", function()
+    print("FLY ($) clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/d1360lucas-ai/DIEGSLOADER/refs/heads/main/FLY"))()
+end)
+
+-- REMOTES CONTENT
+local remotesContainer = tabPanels["Remotes"]
+
+local _, remotesScroll = CreatePanel(
+    remotesContainer,
+    "Remotes",
+    UDim2.new(1, 0, 1, 0),
+    UDim2.new(0, 0, 0, 0)
+)
+
+AddButton(remotesScroll, "SNTS REMOTE SPY (BYPASS)", function()
+    print("SNTS REMOTE SPY (BYPASS) clicked")
+
+    loadstring(game:HttpGet("https://pastebin.com/raw/z1jKTsmC"))()
+end)
+AddButton(remotesScroll, "INFINITE YIELD $", function()
+    print("INFINITE YIELD $ clicked")
+
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+------------------------------------------------------------------------
+-- SETTINGS TAB INTEGRATION
+------------------------------------------------------------------------
+local settingsContainer = tabPanels["Settings"]
+local _, settingsScroll1 = CreatePanel(settingsContainer, "GUI Configurations", UDim2.new(0, 255, 0, 390), UDim2.new(0, 0, 0, 0))
+local _, settingsScroll2 = CreatePanel(settingsContainer, "Keybinds & Controls", UDim2.new(0, 255, 0, 390), UDim2.new(0, 260, 0, 0))
+
+-- Transparency Slider
+local transLabel = Instance.new("TextLabel")
+transLabel.Parent = settingsScroll1
+transLabel.Size = UDim2.new(1, -6, 0, 20)
+transLabel.BackgroundTransparency = 1
+transLabel.Text = "GUI Transparency: 0%"
+transLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+transLabel.Font = Enum.Font.SourceSans
+transLabel.TextSize = 12
+transLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local transSlider = Instance.new("Frame")
+transSlider.Parent = settingsScroll1
+transSlider.Size = UDim2.new(1, -6, 0, 16)
+transSlider.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+transSlider.BorderSizePixel = 0
+
+local transFill = Instance.new("Frame")
+transFill.Parent = transSlider
+transFill.Size = UDim2.new(0, 0, 1, 0)
+transFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+transFill.BorderSizePixel = 0
+
+local draggingTrans = false
+transSlider.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingTrans = true end
+end)
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then draggingTrans = false end
+end)
+UserInputService.InputChanged:Connect(function(i)
+    if draggingTrans and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local p = math.clamp((i.Position.X - transSlider.AbsolutePosition.X) / transSlider.AbsoluteSize.X, 0, 1)
+        transFill.Size = UDim2.new(p, 0, 1, 0)
+        MainFrame.BackgroundTransparency = p * 0.85
+        transLabel.Text = "GUI Transparency: " .. math.floor(p * 100) .. "%"
+    end
+end)
+
+-- Toggle Keybind Change
+local currentToggleKey = Enum.KeyCode.Insert
+
+local keybindLabel = Instance.new("TextLabel")
+keybindLabel.Parent = settingsScroll2
+keybindLabel.Size = UDim2.new(1, -6, 0, 20)
+keybindLabel.BackgroundTransparency = 1
+keybindLabel.Text = "Toggle Key: " .. currentToggleKey.Name
+keybindLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+keybindLabel.Font = Enum.Font.SourceSans
+keybindLabel.TextSize = 12
+keybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local keybindBtn = AddButton(settingsScroll2, "Set Toggle Keybind", function() end)
+keybindBtn.MouseButton1Click:Connect(function()
+    keybindBtn.Text = "Press any key..."
+    keybindBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    local conn
+    conn = UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode ~= Enum.KeyCode.Unknown then
+            if input.KeyCode ~= Enum.KeyCode.Escape then
+                currentToggleKey = input.KeyCode
+                keybindLabel.Text = "Toggle Key: " .. input.KeyCode.Name
+            end
+            keybindBtn.Text = "Set Toggle Keybind"
+            keybindBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            conn:Disconnect()
+        end
+    end)
+end)
+
+-- Dynamic Keybind Listener
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == currentToggleKey then
+        if PillFrame.Visible then
+            PillFrame.Visible = false
+            MainFrame.Visible = true
+        else
+            MainFrame.Visible = not MainFrame.Visible
+        end
+    end
+end)
+
+-- Active Keybinds Table
+AddSectionHeader(settingsScroll2, "◈  Active Keybinds")
+
+local activeKeybinds = {
+    {currentToggleKey.Name, "Toggle GUI"},
+    {"E", "Noclip"},
+    {"K", "Freecam"},
+    {"F8", "Check Anti Cheat"}
+}
+
+for _, kb in ipairs(activeKeybinds) do
+    local kbRow = Instance.new("Frame")
+    kbRow.Parent = settingsScroll2
+    kbRow.Size = UDim2.new(1, -6, 0, 22)
+    kbRow.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    kbRow.BorderSizePixel = 0
+
+    local kKey = Instance.new("TextLabel")
+    kKey.Parent = kbRow
+    kKey.Size = UDim2.new(0.4, 0, 1, 0)
+    kKey.BackgroundTransparency = 1
+    kKey.Text = " [ " .. kb[1] .. " ]"
+    kKey.TextColor3 = Color3.fromRGB(0, 255, 0)
+    kKey.Font = Enum.Font.SourceSansBold
+    kKey.TextSize = 11
+    kKey.TextXAlignment = Enum.TextXAlignment.Left
+
+    local kDesc = Instance.new("TextLabel")
+    kDesc.Parent = kbRow
+    kDesc.Size = UDim2.new(0.6, 0, 1, 0)
+    kDesc.Position = UDim2.new(0.4, 0, 0, 0)
+    kDesc.BackgroundTransparency = 1
+    kDesc.Text = kb[2]
+    kDesc.TextColor3 = Color3.fromRGB(220, 220, 220)
+    kDesc.Font = Enum.Font.SourceSans
+    kDesc.TextSize = 11
+    kDesc.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+-- Background Blur Option
+local blurEffect = Lighting:FindFirstChild("DiegoBlur")
+local function SetBlur(state)
+    if state then
+        if not blurEffect then
+            blurEffect = Instance.new("BlurEffect")
+            blurEffect.Name = "DiegoBlur"
+            blurEffect.Size = 18
+            blurEffect.Parent = Lighting
+        end
+    else
+        if blurEffect then
+            blurEffect:Destroy()
+            blurEffect = nil
+        end
+    end
+end
+
+AddToggle(settingsScroll1, "Background Blur when GUI open", false, function(on)
+    SetBlur(on)
+end)
+
+-- Minimize to Pill Button
+AddButton(settingsScroll1, "Minimize to Pill", function()
+    MainFrame.Visible = false
+    PillFrame.Visible = true
+end)
+
+PillBtn.MouseButton1Click:Connect(function()
+    PillFrame.Visible = false
+    MainFrame.Visible = true
+end)
+
+-- Destroy GUI Button
+local destroyBtn = Instance.new("TextButton")
+destroyBtn.Parent = settingsScroll1
+destroyBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+destroyBtn.Size = UDim2.new(1, -6, 0, 26)
+destroyBtn.Font = Enum.Font.SourceSansBold
+destroyBtn.Text = "DESTROY GUI"
+destroyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyBtn.TextSize = 12
+destroyBtn.ZIndex = 2
+
+destroyBtn.MouseButton1Click:Connect(function()
+    SetBlur(false)
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        BackgroundTransparency = 1,
+    }):Play()
+    task.delay(0.35, function() 
+        ScreenGui:Destroy() 
+    end)
+end)
+
+------------------------------------------------------------------------
+-- PLAYER LIST TAB INTEGRATION
+------------------------------------------------------------------------
+local playerListContainer = tabPanels["Player List"]
+local _, plScroll = CreatePanel(playerListContainer, "Server Players", UDim2.new(0, 255, 0, 390), UDim2.new(0, 0, 0, 0))
+local _, plControls = CreatePanel(playerListContainer, "Player Info & Actions", UDim2.new(0, 255, 0, 390), UDim2.new(0, 260, 0, 0))
+
+local selectedPlayer = nil
+local isViewing = false
+local isBringing = false
+local originalCameraSubject = Camera.CameraSubject
+local bringConnection
+
+-- Player Info Displays
+local nameLabel = Instance.new("TextLabel")
+nameLabel.Parent = plControls
+nameLabel.Size = UDim2.new(1, -6, 0, 22)
+nameLabel.BackgroundTransparency = 1
+nameLabel.Font = Enum.Font.SourceSansBold
+nameLabel.TextSize = 14
+nameLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+nameLabel.Text = "Selected: None"
+nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local healthLabel = Instance.new("TextLabel")
+healthLabel.Parent = plControls
+healthLabel.Size = UDim2.new(1, -6, 0, 22)
+healthLabel.BackgroundTransparency = 1
+healthLabel.Font = Enum.Font.SourceSans
+healthLabel.TextSize = 12
+healthLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+healthLabel.Text = "Health: N/A"
+healthLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+AddSectionHeader(plControls, "Player Controls")
+
+local viewButton = AddButton(plControls, "View Player", function() end)
+local tpButton = AddButton(plControls, "Teleport to Player", function() end)
+local bringButton = AddButton(plControls, "Bring Player", function() end)
+local friendButton = AddButton(plControls, "Add Friend", function() end)
+
+local function revertCamera()
+    if originalCameraSubject and typeof(originalCameraSubject) == "Instance" and originalCameraSubject.Parent then
+        Camera.CameraSubject = originalCameraSubject
+    else
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        end
+    end
+    Camera.CameraType = Enum.CameraType.Custom
+    isViewing = false
+    viewButton.Text = "View Player"
+end
+
+local function refreshPlayerList()
+    for _, c in ipairs(plScroll:GetChildren()) do
+        if c:IsA("TextButton") then c:Destroy() end
+    end
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local btn = Instance.new("TextButton")
+            btn.Parent = plScroll
+            btn.Size = UDim2.new(1, -6, 0, 24)            btn.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+            btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            btn.Font = Enum.Font.SourceSans
+            btn.TextSize = 12
+            btn.Text = "  👤 " .. plr.Name
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+
+            btn.MouseButton1Click:Connect(function()
+                selectedPlayer = plr
+                nameLabel.Text = "Selected: " .. plr.Name
+                local humanoid = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    healthLabel.Text = "Health: " .. math.floor(humanoid.Health)
+                else
+                    healthLabel.Text = "Health: N/A"
+                end
+                if isViewing then revertCamera() end
+            end)
+        end
+    end
+end
+
+viewButton.MouseButton1Click:Connect(function()
+    if not selectedPlayer then return end
+    local char = selectedPlayer.Character
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    if not isViewing then
+        originalCameraSubject = Camera.CameraSubject
+        Camera.CameraSubject = humanoid
+        Camera.CameraType = Enum.CameraType.Custom
+        isViewing = true
+        viewButton.Text = "Unview Player"
+    else
+        revertCamera()
+    end
+end)
+
+tpButton.MouseButton1Click:Connect(function()
+    if not selectedPlayer then return end
+    local targetHRP = selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if targetHRP and myHRP then
+        myHRP.CFrame = targetHRP.CFrame + Vector3.new(2, 0.5, 0)
+    end
+end)
+
+bringButton.MouseButton1Click:Connect(function()
+    if not selectedPlayer then return end
+    if not isBringing then
+        isBringing = true
+        bringButton.Text = "Unbring Player"
+        bringConnection = RunService.RenderStepped:Connect(function()
+            local targetChar = selectedPlayer.Character
+            local myChar = LocalPlayer.Character
+            if targetChar and myChar then
+                local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+                local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+                if targetHRP and myHRP then
+                    targetHRP.CFrame = myHRP.CFrame + Vector3.new(2, 0, 0)
+                end
+            end
+        end)
+    else
+        isBringing = false
+        bringButton.Text = "Bring Player"
+        if bringConnection then bringConnection:Disconnect() end
+    end
+end)
+
+friendButton.MouseButton1Click:Connect(function()
+    if selectedPlayer then
+        LocalPlayer:RequestFriendship(selectedPlayer)
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if selectedPlayer then
+        local humanoid = selectedPlayer.Character and selectedPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            healthLabel.Text = "Health: " .. math.floor(humanoid.Health)
+        else
+            healthLabel.Text = "Health: N/A"
+        end
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+    if plr == selectedPlayer then
+        selectedPlayer = nil
+        nameLabel.Text = "Selected: None"
+        healthLabel.Text = "Health: N/A"
+        if isViewing then revertCamera() end
+    end
+    refreshPlayerList()
+end)
+
+Players.PlayerAdded:Connect(function()
+    refreshPlayerList()
+end)
+
+refreshPlayerList()
