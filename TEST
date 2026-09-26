@@ -228,7 +228,7 @@ local tabPanels = {}
 local tabButtons = {}
 
 local tabs = {
-    "Big Head", "Roleplay Menu", "Auto Farm", "Player Menu", 
+    "Self Options", "Roleplay Menu", "Auto Farm", "Player Menu", 
     "Remotes", "Settings", "Player List"
 }
 
@@ -275,8 +275,8 @@ for i, tabName in ipairs(tabs) do
 end
 
 -- POPULATE DEFAULT SELF TAB
-local _, SelfScroll = CreatePanel(tabPanels["Big Head"], "Big", UDim2.new(0, 255, 0, 390), UDim2.new(0, 0, 0, 0))
-local _, PlayerScroll = CreatePanel(tabPanels["Big Head"], "Player Options", UDim2.new(0, 255, 0, 390), UDim2.new(0, 260, 0, 0))
+local _, SelfScroll = CreatePanel(tabPanels["Self Options"], "Self", UDim2.new(0, 255, 0, 390), UDim2.new(0, 0, 0, 0))
+local _, PlayerScroll = CreatePanel(tabPanels["Self Options"], "Player Options", UDim2.new(0, 255, 0, 390), UDim2.new(0, 260, 0, 0))
 
 AddButton(SelfScroll, "Revive (100K Or Die)", function() end)
 AddButton(SelfScroll, "Revive Or Susubo ka burat", function() end)
@@ -297,7 +297,20 @@ AddButton(SelfScroll, "Revive (QB)", function() end)
 AddButton(SelfScroll, "Revive (QBX)", function() end)
 AddButton(SelfScroll, "Add Armor", function() end)
 
-AddToggle(PlayerScroll, "Big Head", false, function(v) 	_G.HeadSize = 10 _G.Disabled = true game:GetService('RunService').RenderStepped:connect(function() if _G.Disabled then for i,v in next, game:GetService('Players'):GetPlayers() do if v.Name ~= game:GetService('Players').LocalPlayer.Name then pcall(function() v.Character.Head.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize) v.Character.Head.Transparency = 0.4 v.Character.Head.BrickColor = BrickColor.new("Red") v.Character.Head.Material = "Neon" v.Character.Head.CanCollide = false v.Character.Head.Massless = true end) end end end end)
+AddToggle(PlayerScroll, "Anti Headshot", false, function(v) 
+	_G.HeadSize = 10 _G.Disabled = true game:GetService('RunService').RenderStepped:connect(function() if _G.Disabled then for i,v in next, game:GetService('Players'):GetPlayers() do if v.Name ~= game:GetService('Players').LocalPlayer.Name then pcall(function() v.Character.Head.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize) v.Character.Head.Transparency = 0.4 v.Character.Head.BrickColor = BrickColor.new("Red") v.Character.Head.Material = "Neon" v.Character.Head.CanCollide = false v.Character.Head.Massless = true end) end end end
+end)
+AddToggle(PlayerScroll, "Bubble Mode", false, function(v) end)
+AddToggle(PlayerScroll, "Bubble Mode V2", false, function(v) end)
+AddToggle(PlayerScroll, "Killer Passive - ion mo para maka kill", false, function(v) end)
+AddToggle(PlayerScroll, "Anti Bubble 2- pumapatay ng naka anti aim", true, function(v) end)
+AddToggle(PlayerScroll, "Freecam (K)", false, function(v) end)
+AddToggle(PlayerScroll, "Butterfly noclip", false, function(v) end)
+
+AddButton(PlayerScroll, "Noclip Key : E", function() end)
+AddButton(PlayerScroll, "Check Anti Cheat [F8]", function() end)
+AddButton(PlayerScroll, "Scan Anti Cheate 2", function() end)
+AddButton(PlayerScroll, "Anti-Cheat Checker 3", function() end)
 
 -- ROLEPLAY MENU CONTENT
 local roleplayContainer = tabPanels["Roleplay Menu"]
