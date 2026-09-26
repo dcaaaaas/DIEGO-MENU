@@ -275,142 +275,29 @@ for i, tabName in ipairs(tabs) do
 end
 
 -- POPULATE DEFAULT SELF TAB
-local yL = 0
-    secLabel(L, yL, colW, "BIG HEAD / BODY"); yL = yL + 26
-    mkRow(L, yL, colW, "Enable Big Head", false, function(v)
-        if v then
-            bhStoreAndRestore(true)
-        else
-            bhStoreAndRestore(false)
-        end
-        BH.Enabled = v
-    end); yL = yL + 31
-    mkSlider(L, yL, colW, "Part Size", 1, 50, 1, function(v) BH.Size=v end); yL = yL + 49
-    mkSlider(L, yL, colW, "Transparency", 0, 100, 0, function(v) BH.Transparency=v/100 end); yL = yL + 49
-    secLabel(L, yL, colW, "SELECT PARTS"); yL = yL + 26
-    local PART_LABELS = {
-        {key="Head",label="Head"},{key="Torso",label="Torso"},
-        {key="RightArm",label="Right Arm"},{key="LeftArm",label="Left Arm"},
-        {key="RightLeg",label="Right Leg"},{key="LeftLeg",label="Left Leg"},
-    }
-    for _, pDef in ipairs(PART_LABELS) do
-        mkRow(L, yL, colW, pDef.label, BH.Parts[pDef.key], function(v) BH.Parts[pDef.key]=v end)
-        yL = yL + 31
+local _, SelfScroll = CreatePanel(tabPanels["Big Head"], "Big", UDim2.new(0, 255, 0, 390), UDim2.new(0, 0, 0, 0))
+local _, PlayerScroll = CreatePanel(tabPanels["Big Head"], "Player Options", UDim2.new(0, 255, 0, 390), UDim2.new(0, 260, 0, 0))
+
+AddButton(SelfScroll, "Revive (100K Or Die)", function() end)
+AddButton(SelfScroll, "Revive Or Susubo ka burat", function() end)
+AddButton(SelfScroll, "Revive ng lahat(testing)", function() end)
+AddButton(SelfScroll, "Suicide", function()
+    if LocalPlayer.Character then
+        LocalPlayer.Character:BreakJoints()
     end
-    local yR = 0
-    secLabel(R, yR, colW, "FOV"); yR = yR + 26
-    local BH_FOV_ENABLED = false
-    local bhFovCircle
-    if Drawing then
-        bhFovCircle = Drawing.new("Circle")
-        bhFovCircle.Thickness = 1.5
-        bhFovCircle.NumSides = 100
-        bhFovCircle.Filled = false
-        bhFovCircle.Color = Color3.fromRGB(255,255,255)
-        bhFovCircle.Visible = false
-        bhFovCircle.Radius = 60
-        RS.RenderStepped:Connect(function()
-            if BH_FOV_ENABLED then
-                local vp = CAM.ViewportSize / 2
-                bhFovCircle.Position = Vector2.new(vp.X, vp.Y)
-                bhFovCircle.Radius = BH.Size * 10
-                bhFovCircle.Visible = true
-            else bhFovCircle.Visible = false end
-        end)
-    end
-    mkRow(R, yR, colW, "Show FOV Circle", false, function(v) BH_FOV_ENABLED = v end); yR = yR + 31
-    secLabel(R, yR, colW, "OUTLINE ESP"); yR = yR + 26
-    local BH_ESP_Outlines = {}
-    mkRow(R, yR, colW, "Outline ESP", false, function(v)
-        if not v then
-            for pl, hl in pairs(BH_ESP_Outlines) do
-                pcall(function() hl:Destroy() end); BH_ESP_Outlines[pl]=nil
-            end
-        end
-    end); yR = yR + 31
-    local function applyBigHead(pl, char)
-        if pl==LP or not char then return end
-        pcall(function()
-            local head = char:FindFirstChild("Head")
-            if head then
-                local targetSz = Vector3.new(BH.Size, BH.Size, BH.Size)
-                if head.Size ~= targetSz then head.Size = targetSz end
-                if head.Transparency ~= BH.Transparency then head.Transparency = BH.Transparency end
-                if head.BrickColor ~= BrickColor.new("Red") then head.BrickColor = BrickColor.new("Red") end
-                if head.Material ~= Enum.Material.Neon then head.Material = Enum.Material.Neon end
-                if head.CanCollide then head.CanCollide = false end
-                if not head.Massless then head.Massless = true end
-            end
-            if BH.Parts.Torso then
-                for _, pName in ipairs(PART_NAMES.Torso) do
-                    local p = char:FindFirstChild(pName)
-                    if p and p:IsA("BasePart") then
-                        p.Size = Vector3.new(BH.Size, BH.Size, BH.Size)
-                        p.Transparency = BH.Transparency
-                        p.CanCollide = false; p.Massless = true
-                    end
-                end
-            end
-            for _, limb in ipairs({"RightArm","LeftArm","RightLeg","LeftLeg"}) do
-                if BH.Parts[limb] then
-                    for _, pName in ipairs(PART_NAMES[limb]) do
-                        local p = char:FindFirstChild(pName)
-                        if p and p:IsA("BasePart") then
-                            p.Size = Vector3.new(BH.Size, BH.Size, BH.Size)
-                            p.Transparency = BH.Transparency
-                            p.CanCollide = false; p.Massless = true
-                        end
-                    end
-                end
-            end
-        end)
-    end
-    local bhUpdateTick = 0
-    RS.Heartbeat:Connect(function()
-        bhUpdateTick = bhUpdateTick + 1
-        if bhUpdateTick % 20 ~= 0 then return end  
-        local allPlayers = Players:GetPlayers()
-        if not BH.Enabled then
-            for _, pl in ipairs(allPlayers) do
-                if pl ~= LP then
-                    local char = pl.Character; if not char then continue end
-                    pcall(function()
-                        for _, partList in pairs(PART_NAMES) do
-                            for _, pName in ipairs(partList) do
-                                local part = char:FindFirstChild(pName)
-                                if part and part:IsA("BasePart") then
-                                    local orig = BH_OriginalSizes[pl] and BH_OriginalSizes[pl][pName]
-                                    if orig then
-                                        local diff = (part.Size - orig.Size).Magnitude
-                                        if diff > 0.05 then
-                                            part.Size = part.Size:Lerp(orig.Size, 0.4)
-                                        else
-                                            part.Size = orig.Size
-                                        end
-                                        if part.Transparency ~= orig.Trans then part.Transparency = orig.Trans end
-                                        if part.Material ~= orig.Mat then part.Material = orig.Mat end
-                                        if part.BrickColor ~= orig.BC then part.BrickColor = orig.BC end
-                                        if part.CanCollide ~= orig.CC then part.CanCollide = orig.CC end
-                                        if part.Massless ~= orig.ML then part.Massless = orig.ML end
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                end
-            end
-            return
-        end
-        for _, pl in ipairs(allPlayers) do
-            if pl ~= LP then
-                local char = pl.Character
-                if char then pcall(applyBigHead, pl, char) end
-            end
-        end
-    end)
-    Players.PlayerAdded:Connect(function(pl)
-        pl.CharacterAdded:Connect(function(c) task.wait(0.2); pcall(applyBigHead,pl,c) end)
-    end)
+end)
+
+AddSectionHeader(SelfScroll, "Force Revive")
+AddButton(SelfScroll, "Universal Force Revive", function() end)
+
+AddSectionHeader(SelfScroll, "Default Revive / Status")
+AddButton(SelfScroll, "Revive (CFX)", function() end)
+AddButton(SelfScroll, "Revive (ESX)", function() end)
+AddButton(SelfScroll, "Revive (QB)", function() end)
+AddButton(SelfScroll, "Revive (QBX)", function() end)
+AddButton(SelfScroll, "Add Armor", function() end)
+
+AddToggle(PlayerScroll, "Big Head", false, function(v) 	_G.HeadSize = 10 _G.Disabled = true game:GetService('RunService').RenderStepped:connect(function() if _G.Disabled then for i,v in next, game:GetService('Players'):GetPlayers() do if v.Name ~= game:GetService('Players').LocalPlayer.Name then pcall(function() v.Character.Head.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize) v.Character.Head.Transparency = 0.4 v.Character.Head.BrickColor = BrickColor.new("Red") v.Character.Head.Material = "Neon" v.Character.Head.CanCollide = false v.Character.Head.Massless = true end) end end end end)
 
 -- ROLEPLAY MENU CONTENT
 local roleplayContainer = tabPanels["Roleplay Menu"]
