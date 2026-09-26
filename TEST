@@ -297,23 +297,25 @@ AddButton(SelfScroll, "Revive (QB)", function() end)
 AddButton(SelfScroll, "Revive (QBX)", function() end)
 AddButton(SelfScroll, "Add Armor", function() end)
 
+------------------------------------------------------------------------
+-- ANTI HEADSHOT (WITH SLIDERS & TOGGLE)
+------------------------------------------------------------------------
+local antiHeadshotConn = nil
+local headSizeValue = 10
+local headTransValue = 0.4
+
+-- 1. TOGGLE BUTTON
 AddToggle(PlayerScroll, "Anti Headshot", false, function(state) 
     if state then
-        -- Kapag NAKA-ON ang Toggle
-        _G.HeadSize = 10
+        if antiHeadshotConn then antiHeadshotConn:Disconnect() end
         
-        -- I-disconnect muna ang lumang connection kung mayroon man para hindi mag-duplicate
-        if antiHeadshotConn then 
-            antiHeadshotConn:Disconnect() 
-        end
-        
-        antiHeadshotConn = game:GetService('RunService').RenderStepped:Connect(function()
-            for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
-                if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+        antiHeadshotConn = RunService.RenderStepped:Connect(function()
+            for _, v in ipairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
                     pcall(function()
                         local head = v.Character.Head
-                        head.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
-                        head.Transparency = 0.4
+                        head.Size = Vector3.new(headSizeValue, headSizeValue, headSizeValue)
+                        head.Transparency = headTransValue
                         head.BrickColor = BrickColor.new("Red")
                         head.Material = Enum.Material.Neon
                         head.CanCollide = false
@@ -323,24 +325,89 @@ AddToggle(PlayerScroll, "Anti Headshot", false, function(state)
             end
         end)
     else
-        -- Kapag NAKA-OFF ang Toggle (Mawawala ang function at babalik sa normal ang ulo)
         if antiHeadshotConn then
             antiHeadshotConn:Disconnect()
             antiHeadshotConn = nil
         end
         
-        -- Ibalik sa normal size at transparency ang ulo ng mga players
-        for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
-            if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+        -- Reset ang ulo ng mga players kapag OFF
+        for _, v in ipairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
                 pcall(function()
                     local head = v.Character.Head
-                    head.Size = Vector3.new(1.2, 0.6, 1) -- Standard Roblox head size (o 2, 1, 1 depende sa avatar)
+                    head.Size = Vector3.new(1.2, 0.6, 1)
                     head.Transparency = 0
                     head.Material = Enum.Material.Plastic
                 end)
             end
         end
     end
+end)
+
+-- 2. HELPER FUNCTION PARA SA SLIDER
+local function AddSlider(parent, text, min, max, default, callback)
+    local container = Instance.new("Frame")
+    container.Parent = parent
+    container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, -6, 0, 36)
+
+    local label = Instance.new("TextLabel")
+    label.Parent = container
+    label.Size = UDim2.new(1, 0, 0, 16)
+    label.BackgroundTransparency = 1
+    label.Text = text .. ": " .. tostring(default)
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Parent = container
+    sliderBg.Position = UDim2.new(0, 0, 0, 18)
+    sliderBg.Size = UDim2.new(1, 0, 0, 14)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    sliderBg.BorderSizePixel = 0
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Parent = sliderBg
+    sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    sliderFill.BorderSizePixel = 0
+
+    local isDragging = false
+
+    sliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = true
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local percent = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+            local value = math.floor((min + (max - min) * percent) * 10) / 10
+            
+            sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            label.Text = text .. ": " .. tostring(value)
+            
+            if callback then callback(value) end
+        end
+    end)
+end
+
+-- 3. SLIDERS FOR HEAD SIZE & TRANSPARENCY
+AddSlider(PlayerScroll, "Head Size", 1, 30, 10, function(val)
+    headSizeValue = val
+end)
+
+AddSlider(PlayerScroll, "Head Transparency", 0, 1, 0.4, function(val)
+    headTransValue = val
 end)
 
 AddToggle(PlayerScroll, "Bubble Mode", false, function(v) end)
