@@ -297,9 +297,52 @@ AddButton(SelfScroll, "Revive (QB)", function() end)
 AddButton(SelfScroll, "Revive (QBX)", function() end)
 AddButton(SelfScroll, "Add Armor", function() end)
 
-AddToggle(PlayerScroll, "Anti Headshot", false, function() 
-	_G.HeadSize = 10 _G.Disabled = true game:GetService('RunService').RenderStepped:connect(function() if _G.Disabled then for i,v in next, game:GetService('Players'):GetPlayers() do if v.Name ~= game:GetService('Players').LocalPlayer.Name then pcall(function() v.Character.Head.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize) v.Character.Head.Transparency = 0.4 v.Character.Head.BrickColor = BrickColor.new("Red") v.Character.Head.Material = "Neon" v.Character.Head.CanCollide = false v.Character.Head.Massless = true end) end end end end)
+AddToggle(PlayerScroll, "Anti Headshot", false, function(state) 
+    if state then
+        -- Kapag NAKA-ON ang Toggle
+        _G.HeadSize = 10
+        
+        -- I-disconnect muna ang lumang connection kung mayroon man para hindi mag-duplicate
+        if antiHeadshotConn then 
+            antiHeadshotConn:Disconnect() 
+        end
+        
+        antiHeadshotConn = game:GetService('RunService').RenderStepped:Connect(function()
+            for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+                if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+                    pcall(function()
+                        local head = v.Character.Head
+                        head.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                        head.Transparency = 0.4
+                        head.BrickColor = BrickColor.new("Red")
+                        head.Material = Enum.Material.Neon
+                        head.CanCollide = false
+                        head.Massless = true
+                    end)
+                end
+            end
+        end)
+    else
+        -- Kapag NAKA-OFF ang Toggle (Mawawala ang function at babalik sa normal ang ulo)
+        if antiHeadshotConn then
+            antiHeadshotConn:Disconnect()
+            antiHeadshotConn = nil
+        end
+        
+        -- Ibalik sa normal size at transparency ang ulo ng mga players
+        for _, v in ipairs(game:GetService('Players'):GetPlayers()) do
+            if v ~= game:GetService('Players').LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+                pcall(function()
+                    local head = v.Character.Head
+                    head.Size = Vector3.new(1.2, 0.6, 1) -- Standard Roblox head size (o 2, 1, 1 depende sa avatar)
+                    head.Transparency = 0
+                    head.Material = Enum.Material.Plastic
+                end)
+            end
+        end
+    end
 end)
+
 AddToggle(PlayerScroll, "Bubble Mode", false, function(v) end)
 AddToggle(PlayerScroll, "Bubble Mode V2", false, function(v) end)
 AddToggle(PlayerScroll, "Killer Passive - ion mo para maka kill", false, function(v) end)
